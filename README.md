@@ -108,6 +108,9 @@ Scrapling 批量抓取（获取全文，不被 WAF/Cloudflare 拦住）
 | `/research 主题 -quick` | 快速洞察        | 5-8 段/章   | ~5,000–8,000 字   | ~250+ | ~5–8 min   |
 | `/research 主题 -deep`  | 极致深度        | 10-15 段/章 | ~15,000–30,000 字 | ~800+ | ~12–18 min |
 
+## 运行截图
+<img width="2039" height="981" alt="image" src="https://github.com/user-attachments/assets/cf0ed3fe-d24a-498e-8940-7c27dd3db8fc" />
+
 
 ## 安装
 
