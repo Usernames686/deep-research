@@ -4,6 +4,10 @@
 
 **一个命令，六分钟，一份深度专业的调研报告。**
 
+**非 OpenCode 独占。** Claude Code、Codex CLI、Cursor、Windsurf、Cline、Aider、Continue.dev 等主流 AI 编码工具读取本项目后稍作改造即可使用。
+
+多 agent 编排（OpenCode 的 `task()`）思路通用，各平台有自己的等价机制，照猫画虎就行。Scrapling 和 Exa 搜索都是标准 Python/HTTP 工具，不绑定平台。本 skill 的核心价值在于实现思路，而非适配某个特定工具。
+
 ---
 
 ## 为什么你需要这个
