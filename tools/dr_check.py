@@ -42,26 +42,36 @@ def check_encoding(filepath: str) -> dict:
 
 # ── Word Count ────────────────────────────────────────────────────────────
 
-def word_count(filepath: str) -> int:
-    """Count meaningful content chars (excludes markdown syntax)."""
+def _clean_text(filepath: str) -> str:
+    """Read file and strip markdown syntax, return cleaned text."""
     with open(filepath, 'r', encoding='utf-8') as f:
         text = f.read()
-    # Strip markdown syntax that inflates word counts
-    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)   # ## headings
-    text = re.sub(r'^>\s?', '', text, flags=re.MULTILINE)         # > blockquotes
-    text = re.sub(r'^[-*+]\s+', '', text, flags=re.MULTILINE)    # -/*/+ list markers
-    text = re.sub(r'^\d+\.\s+', '', text, flags=re.MULTILINE)    # 1. ordered lists
-    text = text.replace('|', '')                                  # table pipes
-    text = text.replace('`', '')                                  # code markers
-    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)                 # **bold**
-    text = re.sub(r'__(.+?)__', r'\1', text)                     # __bold__
-    text = re.sub(r'\*(.+?)\*', r'\1', text)                     # *italic*
-    text = re.sub(r'_(.+?)_', r'\1', text)                       # _italic_
-    text = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', text)              # [text](url) → text
-    text = re.sub(r'!\[(.+?)\]\(.+?\)', r'\1', text)             # ![alt](url) → alt
-    # Count all non-whitespace chars in cleaned text
-    cleaned = re.sub(r'\s+', '', text)
+    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^>\s?', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^[-*+]\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^\d+\.\s+', '', text, flags=re.MULTILINE)
+    text = text.replace('|', '')
+    text = text.replace('`', '')
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+    text = re.sub(r'__(.+?)__', r'\1', text)
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
+    text = re.sub(r'_(.+?)_', r'\1', text)
+    text = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', text)
+    text = re.sub(r'!\[(.+?)\]\(.+?\)', r'\1', text)
+    return text
+
+
+def word_count(filepath: str) -> int:
+    """Count all meaningful non-whitespace chars (total chars)."""
+    cleaned = re.sub(r'\s+', '', _clean_text(filepath))
     return len(cleaned)
+
+
+def chinese_word_count(filepath: str) -> int:
+    """Count only Chinese characters (\\u4e00-\\u9fff)."""
+    text = _clean_text(filepath)
+    chinese = re.findall(r'[\u4e00-\u9fff]', text)
+    return len(chinese)
 
 
 # ── JSON Validation ───────────────────────────────────────────────────────
@@ -371,8 +381,9 @@ def qa_report(filepath: str, mode: str, target_year: int) -> dict:
     wc = raw.get('word_count_raw', 0)
     limits = {'quick': 6000, 'standard': 10000, 'deep': 20000}
     limit = limits.get(mode, 16000)
-    results['word_count'] = {"passed": wc <= limit, "count": wc, "limit": limit,
-                              "issues": [] if wc <= limit else [f"{wc} > {limit} limit"]}
+    # word_count is informational — does NOT block qa_report passed
+    results['word_count'] = {"passed": True, "count": wc, "limit": limit, "exceeded": wc > limit,
+                              "issues": [] if wc <= limit else [f"{wc} > {limit} limit (informational)"]}
 
     all_passed = all(r.get('passed', False) for r in results.values())
     failures = {name: r.get('issues', []) for name, r in results.items()

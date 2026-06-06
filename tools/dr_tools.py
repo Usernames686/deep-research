@@ -8,7 +8,7 @@ import json
 import sys
 
 from dr_check import (
-    check_encoding, word_count, json_validate,
+    check_encoding, word_count, chinese_word_count, json_validate,
     check_headers, check_chapter_numbers, check_metadata,
     check_toc, check_tail, year_density, check_datapool,
     validate_chapter, qa_report,
@@ -48,7 +48,9 @@ def main():
     # ── Check subcommands ──
     p = sub.add_parser('check-encoding', help='Check UTF-8, BOM, Mojibake')
     p.add_argument('file')
-    p = sub.add_parser('word-count', help='Count characters (excl whitespace)')
+    p = sub.add_parser('word-count', help='Count all chars (excl whitespace/markdown)')
+    p.add_argument('file')
+    p = sub.add_parser('chinese-word-count', help='Count only Chinese characters (\\u4e00-\\u9fff)')
     p.add_argument('file')
     p = sub.add_parser('json-validate', help='Validate JSON')
     p.add_argument('file')
@@ -134,6 +136,9 @@ def main():
         _exit(check_encoding(args.file))
     elif args.command == 'word-count':
         print(word_count(args.file))
+        sys.exit(0)
+    elif args.command == 'chinese-word-count':
+        print(chinese_word_count(args.file))
         sys.exit(0)
     elif args.command == 'json-validate':
         _exit(json_validate(args.file))
@@ -222,7 +227,9 @@ def main():
             wordcount_path=args.wordcount,
             output_path=args.output)
         if result['passed']:
-            print(f"Report assembled: {result['output_path']} ({result['line_count']} lines, {result['chapter_count']} chapters, {result['word_count']} chars)")
+            cn = result.get('chinese_word_count', 0)
+            cn_str = f", {cn} Chinese chars" if cn else ""
+            print(f"Report assembled: {result['output_path']} ({result['line_count']} lines, {result['chapter_count']} chapters, {result['word_count']} chars{cn_str})")
         _exit(result)
 
 

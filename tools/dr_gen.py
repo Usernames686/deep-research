@@ -8,7 +8,7 @@ import os
 import re
 import sys
 
-from dr_check import check_encoding
+from dr_check import check_encoding, chinese_word_count
 
 
 # ── Source Extraction ─────────────────────────────────────────────────────
@@ -68,11 +68,13 @@ def generate_toc(outline_path: str) -> dict:
 def generate_metadata(word_count: int, reading_time: int, data_until: str,
                        generate_time: str, depth_mode: str,
                        source_count: int, top_sources: list,
-                       skill_version: str = "") -> dict:
+                       skill_version: str = "",
+                       chinese_wc: int = 0) -> dict:
     """Generate the two-line metadata block for report header."""
     version_str = f" · Skill版本：{skill_version}" if skill_version else ""
+    cn_str = f"（中文字数：{chinese_wc}）" if chinese_wc else ""
     line1 = (
-        f"> **元数据**：总字数：{word_count} 字 · 阅读时间：{reading_time} 分钟"
+        f"> **元数据**：总字数：{word_count}{cn_str} · 阅读时间：{reading_time} 分钟"
         f" · 数据截至：{data_until} · 生成时间：{generate_time}"
         f" · 调研模式：{depth_mode}{version_str}"
     )
@@ -515,6 +517,9 @@ def assemble_report(outline_path: str, chapters_dir: str,
     total_wc = wc_func(output_path) if os.path.exists(output_path) else 0
     if total_wc == 0:
         total_wc = len(re.sub(r'\s+', '', full_report))
+    cn_wc = chinese_word_count(output_path) if os.path.exists(output_path) else 0
+    if cn_wc == 0:
+        cn_wc = len(re.findall(r'[\u4e00-\u9fff]', full_report))
     reading_time = max(1, round(total_wc / 600))
 
     # 8. Re-generate metadata with real word count, then assemble final
@@ -523,6 +528,7 @@ def assemble_report(outline_path: str, chapters_dir: str,
         data_until=data_until, generate_time=generate_time,
         depth_mode=depth_mode, source_count=total_sources,
         top_sources=top_sources, skill_version=version,
+        chinese_wc=cn_wc,
     )
     report_parts = [
         f"# {title}\n",
@@ -559,5 +565,6 @@ def assemble_report(outline_path: str, chapters_dir: str,
         "line_count": line_count,
         "chapter_count": len(chapter_files),
         "word_count": total_wc,
+        "chinese_word_count": cn_wc,
         "issues": issues,
     }
