@@ -56,15 +56,15 @@ AI 编数字 → 看起来合理，但找不到来源。
 整个流程分 5 个阶段，按顺序自动执行：
 
 ```
-① 分析大纲 — Oracle 分析主题，生成调研框架和搜索计划
+① 分析大纲 — 分析主题，生成调研框架和搜索计划
          ↓
-② 采集数据 — Exa 并行搜索 → Scrapling 批量抓取全文
+② 采集数据 — Exa 并行搜索 + Scrapling 批量抓取（补强与抓取并行）
          ↓
 ③ 预检验证 — 检查数据够不够、来源是否充分、prompt 是否完整
          ↓
 ④ 并行撰写 — 多章节同时撰写，结论先行，数据支撑
          ↓
-⑤ 验收装配 — 质量检查 → 生成目录 → 装配输出到案例报告/
+⑤ 验收装配 — 质量检查 → 装配 → 清理
 ```
 
 ## 五、搜索链路与内置资源
@@ -112,7 +112,7 @@ GDELT 全球新闻   │  36氪 / 澎湃新闻（科技商业新闻）
 | `/research 主题 -deep`  | 极致深度        | 10-15 段/章 | ~15,000–30,000 字 | ~800+ | ~12–18 min |
 
 ## 八、运行截图
-<img width="2039" height="981" alt="image" src="https://github.com/user-attachments/assets/cf0ed3fe-d24a-498e-8940-7c27dd3db8fc" />
+<img width="1638" height="1301" alt="image" src="https://github.com/user-attachments/assets/1e014aff-9ac1-49d0-8cb8-465ecbb24c9f" />
 
 
 ## 九、安装
@@ -122,27 +122,30 @@ GDELT 全球新闻   │  36氪 / 澎湃新闻（科技商业新闻）
 把下面这段提示词复制到 OpenCode 聊天框发送，AI 会自动完成一切：
 
 ```text
-请调研 https://github.com/hoolulu/deep-research 项目，根据 SKILL.md 和 README 的要求，自动安装所有前置依赖（Python、Scrapling、oh-my-openagent），注册 /research 和 /research-update 命令，确保此 skill 在 OpenCode 中正常使用。安装完成后读取 VERSION 文件确认版本号。
+请调研 https://github.com/hoolulu/deep-research 项目，根据文档要求，依次完成：
+
+1. 安装所有前置依赖（根据 Scrapling 官方文档和你当前的操作系统，自行确定安装方式并验证成功）
+2. 注册 Scrapling MCP Server，并确保用户重启 CLI 工具后正常使用
+3. 注册 /research 和 /research-update 命令
+
+每完成一步都确认结果，所有步骤完成后读取 VERSION 文件确认版本号，并总结安装状态（哪些成功、哪些失败、下一步需要用户做什么）。
 ```
 
-AI 会读取项目文档→识别依赖链→逐项安装→验证可用性。不需要手动执行任何命令。
+AI 会读取项目文档→理解系统类型→逐项安装→验证可用性。不需要手动执行任何命令。
 
-### ⚡ 方式二：一键脚本安装（仅 OpenCode）
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/hoolulu/deep-research/main/install.sh | bash
-```
-
-> 发送后 OpenCode 的 AI agent 会自动在终端执行安装，你不需要手动打开命令行。
-
-安装脚本会：检测 OpenCode 目录 → 放置 skill → 自动安装 OMO / Python / Scrapling（必装） → 检查 MCP → 注册 `/research` 和 `/research-update` 命令。
-
-### 🔧 方式三：非 OpenCode 用户（Claude Code / Codex CLI / Cursor 等）
+### 🔧 方式二：非 OpenCode 用户（Claude Code / Codex CLI / Cursor 等）
 
 把这段提示词粘贴到你的 AI 编码工具中：
 
 ```text
-请调研 https://github.com/hoolulu/deep-research 项目，根据文档自动安装前置依赖，适配我的 CLI 工具。需要安装：Python 3 + Scrapling（pip install scrapling），然后根据工具自身机制注册 /research 等价命令。核心是理解多 agent 编排管道设计思路，把 Task 链式架构翻译成当前工具的等价实现。安装完成后读取 VERSION 文件确认版本号。
+请调研 https://github.com/hoolulu/deep-research 项目，根据文档要求自动安装前置依赖，适配我的 CLI 工具。需要完成：
+
+1. 安装 Python 和 Scrapling（根据 Scrapling 官方文档和你当前的操作系统自行确定安装方式并验证）
+2. 注册 Scrapling MCP Server，并确保用户重启 CLI 工具后正常使用
+3. 注册等价于 /research 和 /research-update 的自定义命令
+4. 核心是理解多 agent 编排管道设计思路，把 Task 链式架构翻译成当前工具的等价实现
+
+每完成一步确认结果，安装完成后读取 VERSION 文件确认版本号，并总结安装状态（哪些成功、哪些失败、下一步需要用户做什么）。
 ```
 
 不同工具的适配点：多 agent 编排需映射到各自的原生机制（Claude Code 的 sub-agent、Codex CLI 的多文件任务、Cursor 的 agent 模式等），搜索和抓取逻辑（python-scrapling + 搜索 API）可原样复用。
@@ -161,12 +164,12 @@ curl -fsSL https://opencode.ai/install | bash
 | 组件                                   | 用途                                       | 获取方式                                                                   |
 | ------------------------------------ | ---------------------------------------- | ---------------------------------------------------------------------- |
 | **OpenCode**                         | AI 编码 agent 运行时                          | `curl -fsSL [https://opencode.ai/install](https://opencode.ai/install) |
-| **oh-my-openagent（OH-MY-OPENAGENT）** | 提供 oracle / librarian 子 agent + 自动配置 MCP | `opencode plugins add oh-my-openagent`                                 |
+| **oh-my-openagent（OH-MY-OPENAGENT）** | 提供分析/搜索等子 agent + 自动配置 MCP | `opencode plugins add oh-my-openagent`                                 |
 | **Exa MCP**                          | 网页搜索                                     | 由 OMO 自动配置                                                             |
-| **Scrapling MCP**                    | 网页全文抓取                                   | 由 OMO 自动配置                                                             |
+| **Scrapling + MCP Server**           | 网页全文抓取                                   | `pip install scrapling` + AI 自动在 `opencode.json` 中注册 MCP 配置 |
 
 
-> 本 skill 依赖 OH-MY-OPENAGENT 插件提供的 `oracle` 子 agent。如果没有安装，`/research` 命令无法执行。
+> 本 skill 依赖 OH-MY-OPENAGENT 插件提供的子 agent。如果没有安装，`/research` 命令无法执行。
 
 ## 十、使用方法
 
@@ -185,11 +188,11 @@ curl -fsSL https://opencode.ai/install | bash
 整个流程自动运行，你不需要做任何操作：
 
 ```
-① 阶段1（~50 秒）— oracle 分析主题，生成大纲和搜索计划
+① 阶段1（~50 秒）— 分析主题，生成大纲和搜索计划
 ② 阶段2（~30-45 秒）— Exa 并行搜索 + Scrapling 批量抓取
-③ 阶段3a（~10 秒）— 检查数据是否足够，不够自动补搜
-④ 阶段3b（~3-4 分钟）— 多章节并行撰写报告
-⑤ 阶段3c（~30 秒）— 质量验收 → 装配输出到案例报告/
+③ 阶段3（~10 秒）— 预检验证，检查数据是否充足
+④ 阶段4（~3-4 分钟）— 多章节并行撰写报告
+⑤ 阶段5（~30 秒）— 质量验收 → 装配 → 清理
 ```
 
 > 以上累计 ~5-6 分钟。复杂主题可能延长，简单主题可能缩短。

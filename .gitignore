@@ -1,3 +1,4 @@
 *.bak
 SKILL.md.bak*
 lessons/
+__pycache__/
