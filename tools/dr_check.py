@@ -259,10 +259,12 @@ def validate_chapter(filepath: str, expected_sections: int = 0) -> dict:
         wc = 0
     results['word_count'] = wc
     
-    # blockquote at start (after stripping blank lines)
+    # blockquote at start (skip optional heading on line 1)
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = [l.strip() for l in f.readlines() if l.strip()]
-    has_bq = len(lines) > 0 and lines[0].startswith('>')
+    # If first line is a heading (# ...), check second line
+    check_lines = lines[1:] if lines and lines[0].startswith('#') else lines
+    has_bq = len(check_lines) > 0 and check_lines[0].startswith('>')
     results['has_blockquote'] = has_bq
     
     # paragraph count (non-heading, non-table, non-empty, non-quote lines)
