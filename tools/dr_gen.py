@@ -329,7 +329,7 @@ def prepare_chapter(outline_path: str, datapool_path: str,
     sub_questions = ch.get('sub_questions', [])
 
     # Word limit estimate
-    limits = {'quick': 10000, 'standard': 16000, 'deep': 28000}
+    limits = {'quick': 6000, 'standard': 10000, 'deep': 20000}
     total_limit = limits.get(mode, 16000)
     per_chapter_target = total_limit // max(total_chapters, 1)
 

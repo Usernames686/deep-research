@@ -87,9 +87,7 @@ python {TOOLSDIR}/dr_tools.py year-density <报告> --target-year N # 年份
 
 年份密度检查：如果 `time_anchor.mode == "relaxed"`，**跳过 year-density 检查**（指南/教程类主题不要求时效性）。年份密度不达标但其他项目全过 → 加声明继续。
 
-字数超标 → 用 `word-count` 获取精确字数，对比全文上限（quick 10,000 / standard 16,000 / deep 28,000）：
-  - 超标 ≤ 10% → 加声明继续
-  - 超标 > 10% → **一次性计算需削减量** = `实际字数 - 上限 × 0.95`（留 5% 余量）。定位字数最多的 1 章，计算该章应削减比例 = `需削减量 ÷ 该章当前字数`，在该章正文末尾追加裁剪指令"需精简约 X%"后，对其章节 agent 发起 1 次补刀。**最多 1 轮，不循环**。
+字数超标 → 用 `word-count` 获取精确字数，对比全文上限（quick 6,000 / standard 10,000 / deep 20,000）。**超标即不通过**，在 manifest 中标记 `word_count_exceeded: true`，由主 agent 决定是否降级接受或重跑。
 其他项不达标 → 局部补刀（单章重写，最多 1 次）。
 
 ## Step 3 — 清理

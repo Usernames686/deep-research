@@ -367,7 +367,7 @@ def qa_report(filepath: str, mode: str, target_year: int) -> dict:
     results['year_density'] = raw.get('year_density', {"passed": False, "issues": ["missing"]})
 
     wc = raw.get('word_count_raw', 0)
-    limits = {'quick': 10000, 'standard': 16000, 'deep': 28000}
+    limits = {'quick': 6000, 'standard': 10000, 'deep': 20000}
     limit = limits.get(mode, 16000)
     results['word_count'] = {"passed": wc <= limit, "count": wc, "limit": limit,
                               "issues": [] if wc <= limit else [f"{wc} > {limit} limit"]}
