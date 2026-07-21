@@ -1,0 +1,49 @@
+name: Test
+
+on:
+  push:
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - 'requirements.lock'
+      - 'profiles.json'
+      - 'sources.json'
+      - 'prompts/**'
+      - 'SKILL.md'
+      - '.github/workflows/test.yml'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Install locked dependencies
+        run: python -m pip install -r requirements.lock
+      - name: Check dependencies
+        run: python -m pip check
+      - name: Compile Python sources
+        run: python -m py_compile scrapling-mcp-server.py tools/*.py tests/*.py
+      - name: Run test suite
+        run: python -m unittest discover -s tests -v
+      - name: Verify CLI registration
+        run: python tools/dr_tools.py --help
+      - name: Generate local report browser in a temporary directory
+        run: |
+          output_dir="$(mktemp -d)/browser"
+          python tools/generate_pages.py --local --reports-dir reports --output-dir "$output_dir"
+          test -s "$output_dir/index.html"
+          test -s "$output_dir/reports.json"
+          test -n "$(find "$output_dir/data" -type f -name '*.js' -print -quit)"
+          test -s "$output_dir/dompurify.min.js"
+      - name: Protect checked-in reports and generated browser files
+        run: git diff --exit-code -- reports reports-browser/index.html reports-browser/reports.json
