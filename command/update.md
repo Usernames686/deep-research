@@ -1,52 +1,30 @@
 ---
-description: 检查 deep-research skill 是否有新版本可用，并执行更新
+description: Codex equivalent for /research-update — compare upstream without changing local adaptations
 ---
 
 <command-instruction>
-你是一个版本检查工具。任务是检查 deep-research skill 的本地版本是否落后于远程版本，如有更新则执行拉取。
+你负责检查 deep-research 上游更新。默认流程严格只读：不得 pull、覆盖、复制、提交或删除本地 Skill 文件。
 
-## 检查流程
+## 流程
 
-### Step 1 — 读取本地版本
-读取本地 `VERSION` 文件获取当前版本号：
-- skill 目录可以通过 find 命令定位：`find ~/.opencode/skills -name "VERSION" -path "*/deep-research/*"` 或 `find ~/.config/opencode/skills -name "VERSION" -path "*/deep-research/*"`
-- 读取文件内容即为版本号，例如 `1.0.0`
+1. 定位当前工作区的 `.agents/skills/deep-research/`，读取本地 `VERSION`。
+2. 检查工作区状态并记录本地改动/未跟踪文件；不得执行 reset、checkout、clean 或 stash。
+3. 将 `https://github.com/hoolulu/deep-research` 的 `main` 浅克隆到新的系统临时目录。克隆失败时只报告网络错误，不改变本地目录。
+4. 读取上游 `VERSION`，用只读 diff 比较上游与本地 Skill：
+   - 列出新增、删除、修改的文件；
+   - 单独标出本地 Codex 适配文件和配置；
+   - 说明可能的冲突与迁移风险；
+   - 不把 `reports/`、`reports-browser/index.html` 或本地配置当作可直接覆盖项。
+5. 输出版本差异和建议迁移顺序，然后停止。只有用户在看过 diff 后明确要求实施更新，才进入单独的修改任务。
 
-### Step 2 — 获取远程版本
-用 `webfetch` 获取远程 VERSION 文件：
-`webfetch(url="https://raw.githubusercontent.com/hoolulu/deep-research/main/VERSION")`
-提取内容中的版本号。
-
-### Step 3 — 比较版本
-- 如果本地版本 < 远程版本 → 提示有更新，询问用户是否要更新
-- 如果本地版本 >= 远程版本 → 提示已是最新
-- 如果无法获取远程版本 → 提示网络问题，跳过
-
-### Step 4 — 执行更新（用户确认后）
-先检查 skill 目录是否是通过 git clone 安装的（存在 `.git` 目录）：
-- 有 `.git` → 在 skill 目录执行 `git pull`
-- 无 `.git` → 提示手动更新方式：前往 https://github.com/hoolulu/deep-research 下载最新版，替换 skill 目录
-
-### 输出示例
-
-```
-当前版本：1.0.0
-远程版本：1.1.0
-
-📦 有新版本可用！更新内容：
-- 修复目录生成规则
-- 优化数据池结构
-
-是否执行更新？[y/N]
-```
-
-更新完成后：
-```
-[✓] 已更新到 v1.1.0
-更新内容：请查看 CHANGELOG 或 git log
-```
+无论版本是否相同，都不得自动写入或自动提交。
 </command-instruction>
 
 <user-request>
 $ARGUMENTS
 </user-request>
+
+---
+```
+deep-research by hoolulu · github.com/hoolulu/deep-research
+```

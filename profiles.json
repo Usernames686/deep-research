@@ -1,17 +1,44 @@
 {
   "quick": {
     "min_chapters": 5,
+    "max_chapters": 6,
+    "min_sections": 1,
+    "max_sections": 2,
     "min_paragraphs": 4,
-    "max_chars": 8000
+    "min_tables": 0,
+    "max_facts_per_question": 5,
+    "max_sources_per_question": 5,
+    "max_fetch_urls_per_question": 3,
+    "search_results_per_question": 6,
+    "max_context_chars": 80,
+    "max_chars": 15000
   },
   "standard": {
     "min_chapters": 8,
+    "max_chapters": 10,
+    "min_sections": 2,
+    "max_sections": 4,
     "min_paragraphs": 5,
-    "max_chars": 12000
+    "min_tables": 1,
+    "max_facts_per_question": 8,
+    "max_sources_per_question": 8,
+    "max_fetch_urls_per_question": 4,
+    "search_results_per_question": 8,
+    "max_context_chars": 150,
+    "max_chars": 25000
   },
   "deep": {
     "min_chapters": 10,
+    "max_chapters": 12,
+    "min_sections": 3,
+    "max_sections": 6,
     "min_paragraphs": 6,
-    "max_chars": 25000
+    "min_tables": 1,
+    "max_facts_per_question": 0,
+    "max_sources_per_question": 0,
+    "max_fetch_urls_per_question": 5,
+    "search_results_per_question": 10,
+    "max_context_chars": 0,
+    "max_chars": 45000
   }
 }
